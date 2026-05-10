@@ -1,0 +1,50 @@
+<!-- templates/question.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Builder</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+
+            <h4 class="mb-4">
+                Question {{ current }} / {{ total }}
+            </h4>
+
+            <form method="POST">
+
+                <h5 class="mb-4">{{ question.question }}</h5>
+
+                {% for answer in question.answers %}
+                    <div class="form-check mb-2">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="answer"
+                               value="{{ answer }}"
+                               required>
+
+                        <label class="form-check-label">
+                            {{ answer }}
+                        </label>
+                    </div>
+                {% endfor %}
+
+                <button class="btn btn-primary mt-4">
+                    Next
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
