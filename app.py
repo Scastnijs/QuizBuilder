@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import requests
 import html
+import random
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -16,9 +17,6 @@ def fetch_questions():
 
     for item in response["results"]:
         answers = item["incorrect_answers"] + [item["correct_answer"]]
-
-        # Shuffle answers
-        import random
         random.shuffle(answers)
 
         questions.append({
@@ -35,6 +33,8 @@ def index():
     session["questions"] = fetch_questions()
     session["current"] = 0
     session["score"] = 0
+    session["results"] = []
+
     return redirect(url_for("question"))
 
 
@@ -43,14 +43,28 @@ def question():
     questions = session.get("questions", [])
     current = session.get("current", 0)
     score = session.get("score", 0)
+    results = session.get("results", [])
 
     if request.method == "POST":
-        selected = request.form.get("answer")
-        correct = questions[current]["correct"]
 
-        if selected == correct:
+        selected = request.form.get("answer")
+        current_question = questions[current]
+
+        is_correct = selected == current_question["correct"]
+
+        if is_correct:
             score += 1
             session["score"] = score
+
+        # Save detailed result
+        results.append({
+            "question": current_question["question"],
+            "answer": selected,
+            "correct_answer": current_question["correct"],
+            "is_correct": is_correct
+        })
+
+        session["results"] = results
 
         current += 1
         session["current"] = current
@@ -72,7 +86,13 @@ def question():
 @app.route("/result")
 def result():
     score = session.get("score", 0)
-    return render_template("result.html", score=score)
+    results = session.get("results", [])
+
+    return render_template(
+        "result.html",
+        score=score,
+        results=results
+    )
 
 
 if __name__ == "__main__":
