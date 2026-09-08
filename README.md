@@ -18,19 +18,26 @@ python -m venv my_env
 4)install libraries <br/>
 pip install flask requests
 <br/>
+pip install transformers accelerate sentencepiece safetensors tiktoken protobuf
+<br/>
 <br/>
 4*) restart of python kernel may be required <br/>
 <br/>
-5)run application <br/>
+5) Windows Security <br/>
+→ App & browser control <br/>
+→ Smart App Control <br/>
+Turn Off<br/>
+<br/>
+6)run application <br/>
 python app.py
 <br/>
 <br/>
-6)open in browser <br/>
+7)open in browser <br/>
 http://127.0.0.1:5000
 <br/>
-6*) Ctrl+c to close <br/>
+7*) Ctrl+c to close <br/>
 <br/>
 <br/>
-7)deactivate virtual environment, when you are finished, same for Linux/Windows <br/>
+8)deactivate virtual environment, when you are finished, same for Linux/Windows <br/>
 deactivate
 <br/>
