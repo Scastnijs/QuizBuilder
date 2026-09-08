@@ -16,9 +16,11 @@ python -m venv my_env
 [Windows] .\my_env\Scripts\activate <br/>
 <br/>
 4)install libraries <br/>
-pip install flask requests
+python -m pip install flask requests
 <br/>
-pip install transformers accelerate sentencepiece safetensors tiktoken protobuf
+python -m pip install transformers accelerate sentencepiece safetensors tiktoken protobuf
+<br/>
+python -m pip install --upgrade bitsandbytes accelerate
 <br/>
 <br/>
 4*) restart of python kernel may be required <br/>
