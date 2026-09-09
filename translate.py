@@ -1,36 +1,35 @@
+import threading
+
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from accelerate.utils import get_max_memory
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 
 MODEL_NAME = "TildeAI/TildeOpen-30b"
-
-# Leave roughly 2 GiB of the RTX 4090 free for CUDA context,
-# temporary tensors, activations, and text generation.
 GPU_MAX_MEMORY = "22GiB"
-
-# If Accelerate cannot keep every model component on the GPU,
-# it can offload remaining modules to CPU RAM (or, if necessary,
-# to this folder on disk).
 OFFLOAD_FOLDER = "./offload"
+
+# The model is very large. Keep exactly one tokenizer/model instance per
+# Python process and initialize it only when the first translation is needed.
+_tokenizer = None
+_model = None
+_model_lock = threading.Lock()
 
 
 def load_model():
     if not torch.cuda.is_available():
         raise RuntimeError(
-            "CUDA is not available. This script expects a CUDA-enabled PyTorch "
-            "installation and an NVIDIA GPU."
+            "CUDA is not available. This application expects a CUDA-enabled "
+            "PyTorch installation and an NVIDIA GPU."
         )
 
-    print("Loading tokenizer...")
-
+    print("Loading TildeOpen tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_NAME,
         use_fast=False,
     )
 
     print("Preparing 4-bit quantization...")
-
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -38,13 +37,10 @@ def load_model():
         bnb_4bit_compute_dtype=torch.bfloat16,
     )
 
-    print("Loading model in 4-bit mode...")
-
-    # Start with Accelerate's detected GPU/CPU memory limits, then reserve
-    # about 2 GiB of VRAM for CUDA context and generation-time allocations.
     max_memory = get_max_memory()
     max_memory[0] = GPU_MAX_MEMORY
 
+    print("Loading TildeOpen-30b in 4-bit mode...")
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
         quantization_config=quantization_config,
@@ -57,7 +53,7 @@ def load_model():
 
     model.eval()
 
-    print("Model loaded.")
+    print("Translation model loaded.")
     print(f"GPU: {torch.cuda.get_device_name(0)}")
     print(f"CUDA allocated: {torch.cuda.memory_allocated(0) / 1024**3:.2f} GiB")
     print(f"CUDA reserved:  {torch.cuda.memory_reserved(0) / 1024**3:.2f} GiB")
@@ -72,16 +68,33 @@ def load_model():
     return tokenizer, model
 
 
+def get_translation_model():
+    """Return the shared tokenizer/model, loading them once when first needed."""
+    global _tokenizer, _model
+
+    if _tokenizer is None or _model is None:
+        # Prevent two simultaneous Flask requests from loading two 30B models.
+        with _model_lock:
+            if _tokenizer is None or _model is None:
+                _tokenizer, _model = load_model()
+
+    return _tokenizer, _model
+
+
 def get_input_device(model):
     """Return the device hosting the model's input embedding layer."""
     return model.get_input_embeddings().weight.device
 
 
-def translate_to_latvian(
-    text: str,
-    tokenizer,
-    model,
-) -> str:
+def translate_to_latvian(text: str, tokenizer=None, model=None) -> str:
+    """Translate one English text to Latvian using the shared TildeOpen model."""
+    if not text or not text.strip():
+        return text
+
+    # app.py can simply call translate_to_latvian(text). Explicit tokenizer/model
+    # arguments are still supported for standalone tests and backwards compatibility.
+    if tokenizer is None or model is None:
+        tokenizer, model = get_translation_model()
 
     prompt = f"""
 Translate the following text from English to Latvian.
@@ -89,7 +102,8 @@ Translate the following text from English to Latvian.
 Requirements:
 - Preserve the original meaning.
 - Use natural, fluent Latvian.
-- Use professional language.
+- Keep trivia names, titles, numbers, dates, and proper nouns accurate.
+- Do not answer the trivia question.
 - Do not add explanations.
 - Do not summarize.
 - Return only the Latvian translation.
@@ -105,8 +119,6 @@ Latvian translation:
         return_tensors="pt",
     )
 
-    # With device_map="auto" the model may span GPU and CPU.
-    # Inputs must start on the device that owns the embedding layer.
     input_device = get_input_device(model)
     inputs = {name: tensor.to(input_device) for name, tensor in inputs.items()}
 
@@ -118,8 +130,6 @@ Latvian translation:
             do_sample=False,
         )
 
-    # Decode only newly generated tokens instead of decoding the prompt
-    # and then trying to remove it as a string.
     prompt_token_count = inputs["input_ids"].shape[1]
     generated_tokens = outputs[0][prompt_token_count:]
 
@@ -132,26 +142,9 @@ Latvian translation:
 
 
 def main():
-    tokenizer, model = load_model()
-
-    english_text = """
-I have several years of experience working as a software developer
-and data engineer. My responsibilities included developing data
-processing pipelines, maintaining databases, and supporting
-production systems.
-"""
-
-    translation = translate_to_latvian(
-        english_text,
-        tokenizer,
-        model,
-    )
-
-    print("\n--- English ---")
-    print(english_text.strip())
-
-    print("\n--- Latvian ---")
-    print(translation)
+    sample = "Which planet is known as the Red Planet?"
+    print("English:", sample)
+    print("Latvian:", translate_to_latvian(sample))
 
 
 if __name__ == "__main__":
