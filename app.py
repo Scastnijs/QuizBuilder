@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
+API_QUESTIONS = TOTAL_QUESTIONS + 3
 
 
 # English month names accepted in trivia answers.
@@ -260,14 +261,27 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
     }
 
 def fetch_questions():
-    url = f"https://opentdb.com/api.php?amount={TOTAL_QUESTIONS}&type=multiple"
+    """
+    Request 13 candidate questions from Open Trivia DB and keep translating
+    candidates until 10 successful Latvian quiz questions have been collected.
+
+    A TildeOpen parsing ValueError skips only the failed candidate. The next API
+    question is then tried. This gives up to 3 spare candidates while still
+    returning exactly TOTAL_QUESTIONS questions.
+    """
+    url = f"https://opentdb.com/api.php?amount={API_QUESTIONS}&type=multiple"
     response = requests.get(url, timeout=30)
     response.raise_for_status()
     data = response.json()
 
     questions = []
+    skipped = 0
 
-    for item in data["results"]:
+    for candidate_number, item in enumerate(data["results"], start=1):
+        # Stop immediately once the required 10 successful questions exist.
+        if len(questions) >= TOTAL_QUESTIONS:
+            break
+
         question_text = html.unescape(item["question"])
         correct_answer = html.unescape(item["correct_answer"])
         incorrect_answers = [
@@ -275,12 +289,38 @@ def fetch_questions():
             for answer in item["incorrect_answers"]
         ]
 
-        questions.append(
-            translate_question(
+        try:
+            translated_question = translate_question(
                 question_text,
                 correct_answer,
                 incorrect_answers,
             )
+        except ValueError as exc:
+            skipped += 1
+            print(
+                f"Skipping candidate question {candidate_number}/{API_QUESTIONS} "
+                f"because translation parsing failed."
+            )
+            print(f"Question: {question_text}")
+            print(f"Error: {exc}")
+            print(
+                f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}; "
+                f"skipped: {skipped}/3"
+            )
+            continue
+
+        questions.append(translated_question)
+
+        print(
+            f"Accepted candidate question {candidate_number}/{API_QUESTIONS}. "
+            f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}"
+        )
+
+    if len(questions) < TOTAL_QUESTIONS:
+        raise RuntimeError(
+            f"Could build only {len(questions)} of {TOTAL_QUESTIONS} required "
+            f"quiz questions from {API_QUESTIONS} API candidates. "
+            f"{skipped} candidate translation(s) failed."
         )
 
     return questions
