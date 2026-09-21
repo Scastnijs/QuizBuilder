@@ -18,7 +18,7 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 3
-SUPPORTED_LANGUAGES = {"en", "lv"}
+SUPPORTED_LANGUAGES = {"en", "lv","de"}
 DEFAULT_LANGUAGE = "en"
 TEXTS_FILE = Path(__file__).with_name("texts.json")
 

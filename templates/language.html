@@ -6,6 +6,13 @@
     <title>{{ text.language_page_title }}</title>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .language-options { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; }
+        .language-button { width:200px; padding:20px; border:2px solid #dee2e6; border-radius:12px; background:white; cursor:pointer; transition:transform .2s, box-shadow .2s, border-color .2s; }
+        .language-button:hover { transform:translateY(-4px); box-shadow:0 6px 15px rgba(0,0,0,.15); border-color:#007bff; }
+        .language-flag { display:block; width:120px; height:80px; object-fit:cover; margin:0 auto 15px; border:1px solid #dee2e6; }
+        .language-button span { display:block; font-size:1.1rem; font-weight:500; }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container mt-5">
@@ -15,25 +22,20 @@
             <p class="text-muted mb-4">{{ text.language_prompt }}</p>
 
             <form method="POST" action="{{ url_for('start_quiz') }}">
-                <div class="form-group">
-                    <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="language-en" name="language"
-                               value="en" class="custom-control-input" checked required>
-                        <label class="custom-control-label" for="language-en">
-                            {{ text.language_english }}
-                        </label>
-                    </div>
-                    <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="language-lv" name="language"
-                               value="lv" class="custom-control-input" required>
-                        <label class="custom-control-label" for="language-lv">
-                            {{ text.language_latvian }}
-                        </label>
-                    </div>
+                <div class="language-options">
+                    <button type="submit" name="language" value="en" class="language-button">
+                        <img src="{{ url_for('static', filename='flags/en.svg') }}" alt="{{ text.language_english }}" class="language-flag">
+                        <span>{{ text.language_english }}</span>
+                    </button>
+                    <button type="submit" name="language" value="lv" class="language-button">
+                        <img src="{{ url_for('static', filename='flags/lv.svg') }}" alt="{{ text.language_latvian }}" class="language-flag">
+                        <span>{{ text.language_latvian }}</span>
+                    </button>
+                    <button type="submit" name="language" value="de" class="language-button">
+                        <img src="{{ url_for('static', filename='flags/de.svg') }}" alt="{{ text.language_german }}" class="language-flag">
+                        <span>{{ text.language_german }}</span>
+                    </button>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">
-                    {{ text.start_quiz }}
-                </button>
             </form>
         </div>
     </div>

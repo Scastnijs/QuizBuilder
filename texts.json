@@ -25,7 +25,8 @@
     "correct_answer": "Correct answer",
     "play_again": "Play again?",
     "job_not_found": "Quiz build job not found.",
-    "generation_failed": "Quiz generation failed"
+    "generation_failed": "Quiz generation failed",
+    "language_german": "German"
   },
   "lv": {
     "html_lang": "lv",
@@ -53,6 +54,36 @@
     "correct_answer": "Pareizā atbilde",
     "play_again": "Spēlēt vēlreiz?",
     "job_not_found": "Viktorīnas būves uzdevums nav atrasts.",
-    "generation_failed": "Viktorīnas ģenerēšana neizdevās"
+    "generation_failed": "Viktorīnas ģenerēšana neizdevās",
+    "language_german": "Vācu"
+  },
+  "de": {
+    "html_lang": "de",
+    "language_page_title": "Sprache wählen",
+    "language_heading": "Quizsprache wählen",
+    "language_prompt": "Wählen Sie die Sprache für das Quiz.",
+    "language_english": "Englisch",
+    "language_latvian": "Lettisch",
+    "language_german": "Deutsch",
+    "start_quiz": "Quiz starten",
+    "quiz_builder_title": "Quiz-Builder",
+    "loading_page_title": "Quiz wird vorbereitet",
+    "preparing_quiz": "Ihr Quiz wird vorbereitet...",
+    "preparing_questions": "Fragen werden vorbereitet",
+    "translating_questions": "Fragen werden ins Deutsche übersetzt",
+    "progress_aria_label": "Fortschritt der Fragenvorbereitung",
+    "progress_question_title": "Frage",
+    "progress_error": "Der Quizfortschritt konnte nicht gelesen werden.",
+    "question_label": "Frage",
+    "next": "Weiter",
+    "result_page_title": "Quiz-Ergebnis",
+    "congratulations": "Glückwunsch!",
+    "score_prefix": "Sie haben",
+    "score_suffix": "Fragen richtig beantwortet!",
+    "your_answer": "Ihre Antwort",
+    "correct_answer": "Richtige Antwort",
+    "play_again": "Noch einmal spielen?",
+    "job_not_found": "Quiz-Auftrag wurde nicht gefunden.",
+    "generation_failed": "Quiz-Erstellung fehlgeschlagen"
   }
 }
