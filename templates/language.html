@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ text.html_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ text.language_page_title }}</title>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">{{ text.language_heading }}</h2>
+            <p class="text-muted mb-4">{{ text.language_prompt }}</p>
+
+            <form method="POST" action="{{ url_for('start_quiz') }}">
+                <div class="form-group">
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="language-en" name="language"
+                               value="en" class="custom-control-input" checked required>
+                        <label class="custom-control-label" for="language-en">
+                            {{ text.language_english }}
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="language-lv" name="language"
+                               value="lv" class="custom-control-input" required>
+                        <label class="custom-control-label" for="language-lv">
+                            {{ text.language_latvian }}
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">
+                    {{ text.start_quiz }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

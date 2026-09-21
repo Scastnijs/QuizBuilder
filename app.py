@@ -1,4 +1,6 @@
 from datetime import datetime
+import json
+from pathlib import Path
 from time import perf_counter
 import threading
 import uuid
@@ -16,6 +18,20 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 3
+SUPPORTED_LANGUAGES = {"en", "lv"}
+DEFAULT_LANGUAGE = "en"
+TEXTS_FILE = Path(__file__).with_name("texts.json")
+
+with TEXTS_FILE.open("r", encoding="utf-8") as file:
+    TEXTS = json.load(file)
+
+
+def get_text(language=None):
+    """Return the UI text group for a supported language."""
+    selected = language or session.get("language", DEFAULT_LANGUAGE)
+    if selected not in SUPPORTED_LANGUAGES:
+        selected = DEFAULT_LANGUAGE
+    return TEXTS[selected]
 
 # In-memory quiz build jobs. Suitable for this local single-process QuizBuilder app.
 _build_jobs = {}
@@ -249,15 +265,27 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
         "answers": answers,
     }
 
-def fetch_questions(progress_callback=None):
-    """
-    Request 13 candidate questions from Open Trivia DB and keep translating
-    candidates until 10 successful Latvian quiz questions have been collected.
+def build_question(question_text: str, correct_answer: str, incorrect_answers: list[str], language: str):
+    """Prepare one quiz question. TildeOpen is used only for Latvian."""
+    if language == "lv":
+        return translate_question(question_text, correct_answer, incorrect_answers)
 
-    A TildeOpen parsing ValueError skips only the failed candidate. The next API
-    question is then tried. This gives up to 3 spare candidates while still
-    returning exactly TOTAL_QUESTIONS questions.
-    """
+    # English: use the API question directly. TildeOpen is never loaded/called.
+    prepared_correct = prepare_answer(correct_answer)
+    answers = [prepare_answer(answer) for answer in incorrect_answers]
+    answers.append(prepared_correct)
+    random.shuffle(answers)
+
+    print(f"English question (no translation): {question_text}")
+    return {
+        "question": question_text,
+        "correct": prepared_correct,
+        "answers": answers,
+    }
+
+
+def fetch_questions(language: str, progress_callback=None):
+    """Build 10 questions in the selected language."""
     url = f"https://opentdb.com/api.php?amount={API_QUESTIONS}&type=multiple"
     response = requests.get(url, timeout=30)
     response.raise_for_status()
@@ -267,24 +295,19 @@ def fetch_questions(progress_callback=None):
     skipped = 0
 
     for candidate_number, item in enumerate(data["results"], start=1):
-        # Stop immediately once the required 10 successful questions exist.
         if len(questions) >= TOTAL_QUESTIONS:
             break
 
         question_text = html.unescape(item["question"])
         correct_answer = html.unescape(item["correct_answer"])
-        incorrect_answers = [
-            html.unescape(answer)
-            for answer in item["incorrect_answers"]
-        ]
+        incorrect_answers = [html.unescape(answer) for answer in item["incorrect_answers"]]
 
         try:
-            translated_question = translate_question(
-                question_text,
-                correct_answer,
-                incorrect_answers,
+            prepared_question = build_question(
+                question_text, correct_answer, incorrect_answers, language
             )
         except ValueError as exc:
+            # Translation parsing failures are relevant only to Latvian mode.
             skipped += 1
             print(
                 f"Skipping candidate question {candidate_number}/{API_QUESTIONS} "
@@ -298,9 +321,8 @@ def fetch_questions(progress_callback=None):
             )
             continue
 
-        questions.append(translated_question)
+        questions.append(prepared_question)
 
-        # Progress advances only after a question has been translated successfully.
         if progress_callback is not None:
             progress_callback(len(questions), TOTAL_QUESTIONS)
 
@@ -308,7 +330,7 @@ def fetch_questions(progress_callback=None):
             f"Accepted candidate question {candidate_number}/{API_QUESTIONS}. "
             f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}"
         )
-        print(f"Translated question: {translated_question['question']}")
+        print(f"Question shown in quiz: {prepared_question['question']}")
         print("-" * 80)
 
     if len(questions) < TOTAL_QUESTIONS:
@@ -321,7 +343,7 @@ def fetch_questions(progress_callback=None):
     return questions
 
 
-def _run_quiz_build(job_id: str):
+def _run_quiz_build(job_id: str, language: str):
     """Build a quiz in a background thread and publish 0..10 progress."""
     def update_progress(completed: int, total: int):
         with _build_jobs_lock:
@@ -331,7 +353,7 @@ def _run_quiz_build(job_id: str):
                 job["total"] = total
 
     try:
-        questions = fetch_questions(progress_callback=update_progress)
+        questions = fetch_questions(language, progress_callback=update_progress)
         with _build_jobs_lock:
             job = _build_jobs.get(job_id)
             if job is not None:
@@ -349,7 +371,18 @@ def _run_quiz_build(job_id: str):
 
 @app.route("/")
 def index():
-    """Show progress immediately, then build the new quiz in the background."""
+    """Show language selection before starting a new quiz."""
+    return render_template("language.html", text=get_text(DEFAULT_LANGUAGE))
+
+
+@app.route("/start", methods=["POST"])
+def start_quiz():
+    """Store selected language, create a build job, then show progress."""
+    language = request.form.get("language", DEFAULT_LANGUAGE)
+    if language not in SUPPORTED_LANGUAGES:
+        language = DEFAULT_LANGUAGE
+
+    session["language"] = language
     job_id = uuid.uuid4().hex
 
     with _build_jobs_lock:
@@ -359,11 +392,12 @@ def index():
             "done": False,
             "error": None,
             "questions": None,
+            "language": language,
         }
 
     thread = threading.Thread(
         target=_run_quiz_build,
-        args=(job_id,),
+        args=(job_id, language),
         daemon=True,
     )
     thread.start()
@@ -372,6 +406,8 @@ def index():
         "loading.html",
         job_id=job_id,
         total=TOTAL_QUESTIONS,
+        language=language,
+        text=get_text(language),
     )
 
 
@@ -381,7 +417,7 @@ def quiz_progress(job_id):
     with _build_jobs_lock:
         job = _build_jobs.get(job_id)
         if job is None:
-            return jsonify({"error": "Quiz build job not found."}), 404
+            return jsonify({"error": get_text()["job_not_found"]}), 404
 
         return jsonify({
             "completed": job["completed"],
@@ -397,11 +433,11 @@ def quiz_ready(job_id):
     with _build_jobs_lock:
         job = _build_jobs.get(job_id)
         if job is None:
-            return "Quiz build job not found.", 404
+            return get_text()["job_not_found"], 404
         if not job["done"]:
             return redirect(url_for("index"))
         if job["error"]:
-            return f"Quiz generation failed: {job['error']}", 500
+            return f"{get_text()['generation_failed']}: {job['error']}", 500
 
         questions = job["questions"]
         del _build_jobs[job_id]
@@ -454,6 +490,7 @@ def question():
         question=questions[current],
         current=current + 1,
         total=TOTAL_QUESTIONS,
+        text=get_text(),
     )
 
 
@@ -466,6 +503,7 @@ def result():
         "result.html",
         score=score,
         results=results,
+        text=get_text(),
     )
 
 

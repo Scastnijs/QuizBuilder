@@ -1,82 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ text.html_lang }}">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz Result</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ text.result_page_title }}</title>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-
 <body class="bg-light">
-
 <div class="container mt-5">
-
     <div class="card shadow">
-
         <div class="card-body">
-
             <div class="text-center mb-5">
-                <h1 class="text-success">
-                    Congratulations!
-                </h1>
-
-                <h3>
-                    You answered {{ score }} questions correct!
-                </h3>
+                <h1 class="text-success">{{ text.congratulations }}</h1>
+                <h3>{{ text.score_prefix }} {{ score }} {{ text.score_suffix }}</h3>
             </div>
-
             <table class="table table-bordered table-hover">
-
                 <thead class="thead-dark">
                     <tr>
-                        <th>Question</th>
-                        <th>Your Answer</th>
-                        <th>Correct Answer</th>
+                        <th>{{ text.question_label }}</th>
+                        <th>{{ text.your_answer }}</th>
+                        <th>{{ text.correct_answer }}</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                 {% for item in results %}
                     <tr>
-
-                        <td>
-                            {{ item.question }}
-                        </td>
-
-                        <td class="
-                            {% if item.is_correct %}
-                                table-success
-                            {% else %}
-                                table-danger
-                            {% endif %}
-                        ">
+                        <td>{{ item.question }}</td>
+                        <td class="{% if item.is_correct %}table-success{% else %}table-danger{% endif %}">
                             {{ item.answer }}
                         </td>
-
-                        <td>
-                            {{ item.correct_answer }}
-                        </td>
-
+                        <td>{{ item.correct_answer }}</td>
                     </tr>
                 {% endfor %}
-
                 </tbody>
-
             </table>
-
             <div class="text-center">
-                <a href="/" class="btn btn-primary mt-3">
-                    Play Again
+                <a href="{{ url_for('start_quiz') }}" class="btn btn-primary mt-3">
+                   {{ texts.play_again }}
                 </a>
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 </body>
 </html>
