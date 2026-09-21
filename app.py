@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import perf_counter
 import html
 import random
 import re
@@ -197,65 +198,38 @@ def is_numeric_time_or_money_answer(answer: str) -> bool:
     return False
 
 
-def prepare_answer_for_batch(answer: str) -> dict:
-    """
-    Normalize one answer before the single quiz-item LLM call.
-
-    Returns a dict with:
-      text      - normalized/original answer text
-      translate - whether TildeOpen should translate this answer
-    """
+def prepare_answer(answer: str) -> str:
+    """Normalize deterministic answer types; leave all other answers untranslated."""
     normalized_date = normalize_date_answer(answer)
     if normalized_date is not None:
         print(f"Date answer: {answer} -> {normalized_date}")
-        return {"text": normalized_date, "translate": False}
+        return normalized_date
 
     if is_numeric_time_or_money_answer(answer):
         print(f"Keeping numeric/time/money answer: {answer}")
-        return {"text": answer, "translate": False}
+        return answer
 
-    return {"text": answer, "translate": True}
+    return answer
 
 
 def translate_question(question_text: str, correct_answer: str, incorrect_answers: list[str]):
-    """
-    Normalize all answers first, then translate the complete quiz item in ONE
-    TildeOpen generation. With 10 questions this reduces normal translation work
-    from up to ~50 generations to exactly 10 generations.
-    """
-    source_answers = incorrect_answers + [correct_answer]
-    prepared_answers = []
-    correct_id = None
+    """Translate only the question. Answers are normalized locally and never sent to TildeOpen."""
+    started = perf_counter()
+    print(f"Translating question: {question_text}")
 
-    for index, answer in enumerate(source_answers):
-        answer_id = f"A{index}"
-        prepared = prepare_answer_for_batch(answer)
+    translated_question = translate.translate_to_latvian(question_text)
 
-        prepared_answers.append({
-            "id": answer_id,
-            "text": prepared["text"],
-            "translate": prepared["translate"],
-        })
-
-        if index == len(source_answers) - 1:
-            correct_id = answer_id
-
-    print(f"Translating complete quiz item in one generation: {question_text}")
-    translated = translate.translate_quiz_item(
-        question=question_text,
-        answers=prepared_answers,
-    )
-
-    translated_answers_by_id = translated["answers"]
-    prepared_correct = translated_answers_by_id[correct_id]
-    answers = [
-        translated_answers_by_id[item["id"]]
-        for item in prepared_answers
-    ]
+    prepared_correct = prepare_answer(correct_answer)
+    answers = [prepare_answer(answer) for answer in incorrect_answers]
+    answers.append(prepared_correct)
     random.shuffle(answers)
 
+    elapsed = perf_counter() - started
+    print(f"Translated question: {translated_question}")
+    print(f"Question translation time: {elapsed:.3f} s")
+
     return {
-        "question": translated["question"],
+        "question": translated_question,
         "correct": prepared_correct,
         "answers": answers,
     }
