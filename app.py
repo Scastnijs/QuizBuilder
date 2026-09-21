@@ -1,10 +1,12 @@
 from datetime import datetime
 from time import perf_counter
+import threading
+import uuid
 import html
 import random
 import re
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import requests
 import translate
 
@@ -14,6 +16,10 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 3
+
+# In-memory quiz build jobs. Suitable for this local single-process QuizBuilder app.
+_build_jobs = {}
+_build_jobs_lock = threading.Lock()
 
 
 # English month names accepted in trivia answers.
@@ -234,7 +240,7 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
         "answers": answers,
     }
 
-def fetch_questions():
+def fetch_questions(progress_callback=None):
     """
     Request 13 candidate questions from Open Trivia DB and keep translating
     candidates until 10 successful Latvian quiz questions have been collected.
@@ -285,6 +291,10 @@ def fetch_questions():
 
         questions.append(translated_question)
 
+        # Progress advances only after a question has been translated successfully.
+        if progress_callback is not None:
+            progress_callback(len(questions), TOTAL_QUESTIONS)
+
         print(
             f"Accepted candidate question {candidate_number}/{API_QUESTIONS}. "
             f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}"
@@ -302,9 +312,92 @@ def fetch_questions():
     return questions
 
 
+def _run_quiz_build(job_id: str):
+    """Build a quiz in a background thread and publish 0..10 progress."""
+    def update_progress(completed: int, total: int):
+        with _build_jobs_lock:
+            job = _build_jobs.get(job_id)
+            if job is not None:
+                job["completed"] = completed
+                job["total"] = total
+
+    try:
+        questions = fetch_questions(progress_callback=update_progress)
+        with _build_jobs_lock:
+            job = _build_jobs.get(job_id)
+            if job is not None:
+                job["questions"] = questions
+                job["completed"] = TOTAL_QUESTIONS
+                job["done"] = True
+    except Exception as exc:
+        print(f"Quiz build failed: {exc}")
+        with _build_jobs_lock:
+            job = _build_jobs.get(job_id)
+            if job is not None:
+                job["error"] = str(exc)
+                job["done"] = True
+
+
 @app.route("/")
 def index():
-    session["questions"] = fetch_questions()
+    """Show progress immediately, then build the new quiz in the background."""
+    job_id = uuid.uuid4().hex
+
+    with _build_jobs_lock:
+        _build_jobs[job_id] = {
+            "completed": 0,
+            "total": TOTAL_QUESTIONS,
+            "done": False,
+            "error": None,
+            "questions": None,
+        }
+
+    thread = threading.Thread(
+        target=_run_quiz_build,
+        args=(job_id,),
+        daemon=True,
+    )
+    thread.start()
+
+    return render_template(
+        "loading.html",
+        job_id=job_id,
+        total=TOTAL_QUESTIONS,
+    )
+
+
+@app.route("/quiz-progress/<job_id>")
+def quiz_progress(job_id):
+    """Return the current translation progress for the loading page."""
+    with _build_jobs_lock:
+        job = _build_jobs.get(job_id)
+        if job is None:
+            return jsonify({"error": "Quiz build job not found."}), 404
+
+        return jsonify({
+            "completed": job["completed"],
+            "total": job["total"],
+            "done": job["done"],
+            "error": job["error"],
+        })
+
+
+@app.route("/quiz-ready/<job_id>")
+def quiz_ready(job_id):
+    """Move the completed quiz into the browser session and start question 1."""
+    with _build_jobs_lock:
+        job = _build_jobs.get(job_id)
+        if job is None:
+            return "Quiz build job not found.", 404
+        if not job["done"]:
+            return redirect(url_for("index"))
+        if job["error"]:
+            return f"Quiz generation failed: {job['error']}", 500
+
+        questions = job["questions"]
+        del _build_jobs[job_id]
+
+    session["questions"] = questions
     session["current"] = 0
     session["score"] = 0
     session["results"] = []
