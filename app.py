@@ -268,6 +268,13 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
         # Always initialize display_question, even when neither rule matches.
         display_question = translated_question.strip()
 
+    # Validate length only after extracting the question shown in the quiz.
+    if len(display_question) > 500:
+        raise ValueError(
+            f"Translated question is too long after cutting: "
+            f"{len(display_question)} characters (maximum 500)."
+        )
+
     return {
         "question": display_question,
         "correct": prepared_correct,
