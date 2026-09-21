@@ -255,13 +255,17 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
     # not produce a question mark, keep the complete translation unchanged.
     # If TildeOpen produced a single period, keep only the text through that period.
     first_question_mark = translated_question.find("?")
+
     if first_question_mark != -1:
+        # Preferred case: keep everything through the first question mark.
         display_question = translated_question[:first_question_mark + 1].strip()
-    if first_question_mark == -1:
-        if translated_question.count(".") == 1:
-            first_period = translated_question.find(".")
-            display_question = translated_question[:first_period + 1].strip()
+    elif translated_question.count(".") == 1:
+        # Fallback: if there is no question mark and exactly one period,
+        # keep everything through that period.
+        first_period = translated_question.find(".")
+        display_question = translated_question[:first_period + 1].strip()
     else:
+        # Always initialize display_question, even when neither rule matches.
         display_question = translated_question.strip()
 
     return {

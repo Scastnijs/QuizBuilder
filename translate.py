@@ -1,12 +1,16 @@
 import threading
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers.utils import logging as transformers_logging
 from accelerate.utils import get_max_memory
 
 
 MODEL_NAME = "TildeAI/TildeOpen-30b"
 GPU_MAX_MEMORY = "22GiB"
 OFFLOAD_FOLDER = "./offload"
+
+# Suppress Transformers tqdm progress bars such as "Loading weights: 123/543".
+transformers_logging.disable_progress_bar()
 
 _tokenizer = None
 _model = None
@@ -21,10 +25,9 @@ def load_model():
             "installation and an NVIDIA GPU."
         )
 
-    print("Loading tokenizer...")
+    print("Loading TildeOpen-30b weights...")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
 
-    print("Preparing 4-bit quantization...")
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -32,7 +35,6 @@ def load_model():
         bnb_4bit_compute_dtype=torch.bfloat16,
     )
 
-    print("Loading model in 4-bit mode...")
     max_memory = get_max_memory()
     max_memory[0] = GPU_MAX_MEMORY
 
@@ -47,7 +49,7 @@ def load_model():
     )
     model.eval()
 
-    print("Model loaded.")
+    print("TildeOpen-30b weights loaded.")
     print(f"GPU: {torch.cuda.get_device_name(0)}")
     print(f"CUDA allocated: {torch.cuda.memory_allocated(0) / 1024**3:.2f} GiB")
     print(f"CUDA reserved:  {torch.cuda.memory_reserved(0) / 1024**3:.2f} GiB")
