@@ -234,12 +234,12 @@ def prepare_answer(answer: str) -> str:
     return answer
 
 
-def translate_question(question_text: str, correct_answer: str, incorrect_answers: list[str]):
+def translate_question(question_text: str, correct_answer: str, incorrect_answers: list[str], language: str):
     """Translate only the question. Answers are normalized locally and never sent to TildeOpen."""
     started = perf_counter()
     print(f"Translating question: {question_text}")
 
-    translated_question = translate.translate_to_latvian(question_text)
+    translated_question = translate.translate_text(question_text, language)
 
     prepared_correct = prepare_answer(correct_answer)
     answers = [prepare_answer(answer) for answer in incorrect_answers]
@@ -282,9 +282,11 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
     }
 
 def build_question(question_text: str, correct_answer: str, incorrect_answers: list[str], language: str):
-    """Prepare one quiz question. TildeOpen is used only for Latvian."""
-    if language == "lv":
-        return translate_question(question_text, correct_answer, incorrect_answers)
+    """Prepare one quiz question. TildeOpen is used for supported non-English languages."""
+    if language in {"lv", "de"}:
+        return translate_question(
+            question_text, correct_answer, incorrect_answers, language
+        )
 
     # English: use the API question directly. TildeOpen is never loaded/called.
     prepared_correct = prepare_answer(correct_answer)
@@ -323,7 +325,7 @@ def fetch_questions(language: str, progress_callback=None):
                 question_text, correct_answer, incorrect_answers, language
             )
         except ValueError as exc:
-            # Translation parsing failures are relevant only to Latvian mode.
+            # Translation parsing failures are relevant to translated-language modes.
             skipped += 1
             print(
                 f"Skipping candidate question {candidate_number}/{API_QUESTIONS} "
@@ -400,7 +402,7 @@ def start_quiz():
     GET is used by Play Again and keeps the language already stored in session.
 
     English skips loading.html because no TildeOpen translation is required.
-    Latvian keeps the background build and progress screen.
+    Latvian and German keep the background build and progress screen.
     """
     if request.method == "POST":
         language = request.form.get("language", DEFAULT_LANGUAGE)
@@ -422,7 +424,7 @@ def start_quiz():
         session["results"] = []
         return redirect(url_for("question"))
 
-    # Latvian still uses TildeOpen, so build in the background and show progress.
+    # Latvian and German use TildeOpen, so build in the background and show progress.
     job_id = uuid.uuid4().hex
 
     with _build_jobs_lock:

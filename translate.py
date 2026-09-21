@@ -104,6 +104,39 @@ def _generate(prompt: str, max_new_tokens: int = 512) -> str:
     return tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
 
 
+
+def translate_text(text: str, target_language: str) -> str:
+    """Translate one standalone English string to the requested target language."""
+    target_languages = {
+        "lv": "Latvian",
+        "de": "German",
+    }
+
+    language_name = target_languages.get(target_language)
+    if language_name is None:
+        raise ValueError(
+            f"Unsupported target language: {target_language}. "
+            f"Supported target languages: {', '.join(target_languages)}"
+        )
+
+    prompt = f"""
+Translate the following text from English to {language_name}.
+
+Requirements:
+- Preserve the original meaning.
+- Use natural, fluent {language_name}.
+- Do not add explanations.
+- Do not summarize.
+- Return only the {language_name} translation.
+
+English text:
+{text}
+
+{language_name} translation:
+"""
+    return _generate(prompt, max_new_tokens=256)
+
+
 def translate_to_latvian(text: str) -> str:
     """Translate one standalone string. Kept for other QuizBuilder uses."""
     prompt = f"""
