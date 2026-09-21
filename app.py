@@ -253,9 +253,14 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
     # Keep the complete TildeOpen output in the terminal above, but only show
     # text through the first question mark in the quiz UI. If TildeOpen did
     # not produce a question mark, keep the complete translation unchanged.
+    # If TildeOpen produced a single period, keep only the text through that period.
     first_question_mark = translated_question.find("?")
     if first_question_mark != -1:
         display_question = translated_question[:first_question_mark + 1].strip()
+    if first_question_mark == -1:
+        if translated_question.count(".") == 1:
+            first_period = translated_question.find(".")
+            display_question = translated_question[:first_period + 1].strip()
     else:
         display_question = translated_question.strip()
 
@@ -375,14 +380,38 @@ def index():
     return render_template("language.html", text=get_text(DEFAULT_LANGUAGE))
 
 
-@app.route("/start", methods=["POST"])
+@app.route("/start", methods=["GET", "POST"])
 def start_quiz():
-    """Store selected language, create a build job, then show progress."""
-    language = request.form.get("language", DEFAULT_LANGUAGE)
+    """
+    Start a new quiz.
+
+    POST is used after language selection.
+    GET is used by Play Again and keeps the language already stored in session.
+
+    English skips loading.html because no TildeOpen translation is required.
+    Latvian keeps the background build and progress screen.
+    """
+    if request.method == "POST":
+        language = request.form.get("language", DEFAULT_LANGUAGE)
+    else:
+        language = session.get("language", DEFAULT_LANGUAGE)
+
     if language not in SUPPORTED_LANGUAGES:
         language = DEFAULT_LANGUAGE
 
     session["language"] = language
+
+    # English needs no TildeOpen translation, so build the quiz immediately
+    # and go directly to question 1 without showing loading.html.
+    if language == "en":
+        questions = fetch_questions(language)
+        session["questions"] = questions
+        session["current"] = 0
+        session["score"] = 0
+        session["results"] = []
+        return redirect(url_for("question"))
+
+    # Latvian still uses TildeOpen, so build in the background and show progress.
     job_id = uuid.uuid4().hex
 
     with _build_jobs_lock:
