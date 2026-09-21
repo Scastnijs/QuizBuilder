@@ -234,8 +234,17 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
     print(f"Translated question: {translated_question}")
     print(f"Question translation time: {elapsed:.3f} s")
 
+    # Keep the complete TildeOpen output in the terminal above, but only show
+    # text through the first question mark in the quiz UI. If TildeOpen did
+    # not produce a question mark, keep the complete translation unchanged.
+    first_question_mark = translated_question.find("?")
+    if first_question_mark != -1:
+        display_question = translated_question[:first_question_mark + 1].strip()
+    else:
+        display_question = translated_question.strip()
+
     return {
-        "question": translated_question,
+        "question": display_question,
         "correct": prepared_correct,
         "answers": answers,
     }
