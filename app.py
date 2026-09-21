@@ -315,6 +315,8 @@ def fetch_questions():
             f"Accepted candidate question {candidate_number}/{API_QUESTIONS}. "
             f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}"
         )
+        print(f"Translated question: {translated_question['question']}")
+        print("-" * 80)
 
     if len(questions) < TOTAL_QUESTIONS:
         raise RuntimeError(
