@@ -18,7 +18,7 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 10
-SUPPORTED_LANGUAGES = {"en", "lv","de","ua"}
+SUPPORTED_LANGUAGES = {"en", "lv","de","ua","bg"}
 DEFAULT_LANGUAGE = "en"
 TEXTS_FILE = Path(__file__).with_name("texts.json")
 
@@ -283,7 +283,7 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
 
 def build_question(question_text: str, correct_answer: str, incorrect_answers: list[str], language: str):
     """Prepare one quiz question. TildeOpen is used for supported non-English languages."""
-    if language in {"lv", "de", "ua"}:
+    if language in {"lv", "de", "ua", "bg"}:
         return translate_question(
             question_text, correct_answer, incorrect_answers, language
         )

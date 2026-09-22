@@ -102,5 +102,31 @@
     "play_again": "Зіграти ще раз?",
     "job_not_found": "Завдання зі створення вікторини не знайдено.",
     "generation_failed": "Не вдалося створити вікторину"
+  },
+  "bg": {
+    "html_lang": "bg",
+    "language_page_title": "Изберете език",
+    "language_heading": "Изберете език за викторината",
+    "language_prompt": "Изберете езика за викторината.",
+    "start_quiz": "Започнете викторината",
+    "quiz_builder_title": "Създател на викторини",
+    "loading_page_title": "Подготовка на викторината",
+    "preparing_quiz": "Подготвяме вашата викторина...",
+    "preparing_questions": "Подготовка на въпроси",
+    "translating_questions": "Превеждане на въпросите на български език",
+    "progress_aria_label": "Напредък при подготовката на въпросите",
+    "progress_question_title": "Въпрос",
+    "progress_error": "Не може да се прочете напредъкът на викторината.",
+    "question_label": "Въпрос",
+    "next": "Следващ",
+    "result_page_title": "Резултат от викторината",
+    "congratulations": "Поздравления!",
+    "score_prefix": "Отговорихте правилно на",
+    "score_suffix": "въпроса!",
+    "your_answer": "Вашият отговор",
+    "correct_answer": "Правилен отговор",
+    "play_again": "Искате ли да играете отново?",
+    "job_not_found": "Задачата за изграждане на викторина не е намерена.",
+    "generation_failed": "Генерирането на викторина не бе успешно"
   }
 }
