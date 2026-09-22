@@ -4,8 +4,6 @@
     "language_page_title": "Choose Language",
     "language_heading": "Choose quiz language",
     "language_prompt": "Select the language for the quiz.",
-    "language_english": "English",
-    "language_latvian": "Latvian",
     "start_quiz": "Start quiz",
     "quiz_builder_title": "Quiz builder",
     "loading_page_title": "Preparing quiz",
@@ -25,16 +23,13 @@
     "correct_answer": "Correct answer",
     "play_again": "Play again?",
     "job_not_found": "Quiz build job not found.",
-    "generation_failed": "Quiz generation failed",
-    "language_german": "German"
+    "generation_failed": "Quiz generation failed"
   },
   "lv": {
     "html_lang": "lv",
     "language_page_title": "Izvēlieties valodu",
     "language_heading": "Izvēlieties viktorīnas valodu",
     "language_prompt": "Izvēlieties viktorīnas valodu.",
-    "language_english": "Angļu",
-    "language_latvian": "Latviešu",
     "start_quiz": "Sākt",
     "quiz_builder_title": "Viktorīnas veidotājs",
     "loading_page_title": "Viktorīnas sagatavošana",
@@ -54,17 +49,13 @@
     "correct_answer": "Pareizā atbilde",
     "play_again": "Spēlēt vēlreiz?",
     "job_not_found": "Viktorīnas būves uzdevums nav atrasts.",
-    "generation_failed": "Viktorīnas ģenerēšana neizdevās",
-    "language_german": "Vācu"
+    "generation_failed": "Viktorīnas ģenerēšana neizdevās"
   },
   "de": {
     "html_lang": "de",
     "language_page_title": "Sprache wählen",
     "language_heading": "Quizsprache wählen",
     "language_prompt": "Wählen Sie die Sprache für das Quiz.",
-    "language_english": "Englisch",
-    "language_latvian": "Lettisch",
-    "language_german": "Deutsch",
     "start_quiz": "Quiz starten",
     "quiz_builder_title": "Quiz-Builder",
     "loading_page_title": "Quiz wird vorbereitet",
@@ -85,5 +76,31 @@
     "play_again": "Noch einmal spielen?",
     "job_not_found": "Quiz-Auftrag wurde nicht gefunden.",
     "generation_failed": "Quiz-Erstellung fehlgeschlagen"
+  },
+    "ua": {
+    "html_lang": "ua",
+    "language_page_title": "Виберіть мову",
+    "language_heading": "Виберіть мову вікторини",
+    "language_prompt": "Виберіть мову для вікторини.",
+    "start_quiz": "Почати вікторину",
+    "quiz_builder_title": "Конструктор вікторин",
+    "loading_page_title": "Підготовка вікторини",
+    "preparing_quiz": "Готуємо вашу вікторину...",
+    "preparing_questions": "Підготовка запитань",
+    "translating_questions": "Переклад запитань українською мовою",
+    "progress_aria_label": "Прогрес підготовки запитань",
+    "progress_question_title": "Запитання",
+    "progress_error": "Не вдалося отримати інформацію про прогрес вікторини.",
+    "question_label": "Запитання",
+    "next": "Далі",
+    "result_page_title": "Результат вікторини",
+    "congratulations": "Вітаємо!",
+    "score_prefix": "Ви правильно відповіли на",
+    "score_suffix": "запитань!",
+    "your_answer": "Ваша відповідь",
+    "correct_answer": "Правильна відповідь",
+    "play_again": "Зіграти ще раз?",
+    "job_not_found": "Завдання зі створення вікторини не знайдено.",
+    "generation_failed": "Не вдалося створити вікторину"
   }
 }
