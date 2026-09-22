@@ -1,5 +1,6 @@
 # QuizBuilder
-Quiz builder with Open Trivia API
+Quiz builder with Open Trivia API https://opentdb.com/
+<br/>
 Requirements: python installation + tool to install libraries, in this example pip is used <br/>
 How to run (terminal): <br/>
 <br/>
