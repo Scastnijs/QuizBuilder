@@ -112,6 +112,14 @@ def translate_text(text: str, target_language: str) -> str:
         "de": "German",
         "ua": "Ukrainian",
         "bg": "Bulgarian",
+        "cz": "Czech",
+        "ee": "Estonian",
+        "fi": "Finnish",
+        "fr": "French",
+        "hu": "Hungarian",
+        "is": "Icelandic",
+        "it": "Italian",
+        "lt": "Lithuanian",
     }
 
     language_name = target_languages.get(target_language)

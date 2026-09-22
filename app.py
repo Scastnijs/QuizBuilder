@@ -18,7 +18,7 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 10
-SUPPORTED_LANGUAGES = {"en", "lv","de","ua","bg"}
+SUPPORTED_LANGUAGES = {"en", "lv", "de", "ua", "bg", "cz", "ee", "fi", "fr", "hu", "is", "it", "lt"}
 DEFAULT_LANGUAGE = "en"
 TEXTS_FILE = Path(__file__).with_name("texts.json")
 
@@ -283,7 +283,7 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
 
 def build_question(question_text: str, correct_answer: str, incorrect_answers: list[str], language: str):
     """Prepare one quiz question. TildeOpen is used for supported non-English languages."""
-    if language in {"lv", "de", "ua", "bg"}:
+    if language != "en":
         return translate_question(
             question_text, correct_answer, incorrect_answers, language
         )
@@ -335,7 +335,7 @@ def fetch_questions(language: str, progress_callback=None):
             print(f"Error: {exc}")
             print(
                 f"Successful questions: {len(questions)}/{TOTAL_QUESTIONS}; "
-                f"skipped: {skipped}/3"
+                f"skipped: {skipped}/{API_QUESTIONS - TOTAL_QUESTIONS}"
             )
             continue
 
@@ -402,7 +402,7 @@ def start_quiz():
     GET is used by Play Again and keeps the language already stored in session.
 
     English skips loading.html because no TildeOpen translation is required.
-    Latvian and German keep the background build and progress screen.
+    All non-English languages keep the background build and progress screen.
     """
     if request.method == "POST":
         language = request.form.get("language", DEFAULT_LANGUAGE)
@@ -424,7 +424,7 @@ def start_quiz():
         session["results"] = []
         return redirect(url_for("question"))
 
-    # Latvian and German use TildeOpen, so build in the background and show progress.
+    # All non-English languages use TildeOpen, so build in the background and show progress.
     job_id = uuid.uuid4().hex
 
     with _build_jobs_lock:
