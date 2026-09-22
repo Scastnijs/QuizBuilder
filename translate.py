@@ -120,6 +120,17 @@ def translate_text(text: str, target_language: str) -> str:
         "is": "Icelandic",
         "it": "Italian",
         "lt": "Lithuanian",
+        "nl": "Dutch",
+        "pl": "Polish",
+        "pt": "Portuguese",
+        "ro": "Romanian",
+        "ru": "Russian",
+        "se": "Swedish",
+        "si": "Slovenian",
+        "sk": "Slovak",
+        "tr": "Turkish",
+        "rs": "Serbian",
+        "es": "Spanish",
     }
 
     language_name = target_languages.get(target_language)

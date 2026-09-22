@@ -18,7 +18,7 @@ app.secret_key = "supersecretkey"
 
 TOTAL_QUESTIONS = 10
 API_QUESTIONS = TOTAL_QUESTIONS + 10
-SUPPORTED_LANGUAGES = {"en", "lv", "de", "ua", "bg", "cz", "ee", "fi", "fr", "hu", "is", "it", "lt"}
+SUPPORTED_LANGUAGES = {"en", "lv", "de", "ua", "bg", "cz", "ee", "fi", "fr", "hu", "is", "it", "lt", "nl", "pl", "pt", "ro", "ru", "se", "si", "sk", "tr", "rs", "es"}
 DEFAULT_LANGUAGE = "en"
 TEXTS_FILE = Path(__file__).with_name("texts.json")
 
@@ -269,10 +269,10 @@ def translate_question(question_text: str, correct_answer: str, incorrect_answer
         display_question = translated_question.strip()
 
     # Validate length only after extracting the question shown in the quiz.
-    if len(display_question) > 500:
+    if len(display_question) > 300:
         raise ValueError(
             f"Translated question is too long after cutting: "
-            f"{len(display_question)} characters (maximum 500)."
+            f"{len(display_question)} characters (maximum 300)."
         )
 
     return {

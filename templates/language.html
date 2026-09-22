@@ -11,7 +11,6 @@
         .language-button { width:200px; padding:20px; border:2px solid #dee2e6; border-radius:12px; background:white; cursor:pointer; transition:transform .2s, box-shadow .2s, border-color .2s; }
         .language-button:hover { transform:translateY(-4px); box-shadow:0 6px 15px rgba(0,0,0,.15); border-color:#007bff; }
         .language-flag { display:block; width:120px; height:80px; object-fit:cover; margin:0 auto 15px; border:1px solid #dee2e6; }
-        .language-button span { display:block; font-size:1.1rem; font-weight:500; }
     </style>
 </head>
 <body class="bg-light">
@@ -23,57 +22,77 @@
 
             <form method="POST" action="{{ url_for('start_quiz') }}">
                 <div class="language-options">
-                    <button type="submit" name="language" value="en" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/en.svg') }}" alt="{{ text.language_english }}" class="language-flag">
-                        <span>{{ text.language_english }}</span>
+                    <button type="submit" name="language" value="en" class="language-button" aria-label="English">
+                        <img src="{{ url_for('static', filename='flags/en.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="lv" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/lv.svg') }}" alt="{{ text.language_latvian }}" class="language-flag">
-                        <span>{{ text.language_latvian }}</span>
+                    <button type="submit" name="language" value="lv" class="language-button" aria-label="Latvian">
+                        <img src="{{ url_for('static', filename='flags/lv.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="de" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/de.svg') }}" alt="{{ text.language_german }}" class="language-flag">
-                        <span>{{ text.language_german }}</span>
+                    <button type="submit" name="language" value="de" class="language-button" aria-label="German">
+                        <img src="{{ url_for('static', filename='flags/de.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="ua" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/ua.svg') }}" alt="{{ text.language_ukrainian }}" class="language-flag">
-                        <span>{{ text.language_ukrainian }}</span>
+                    <button type="submit" name="language" value="ua" class="language-button" aria-label="Ukrainian">
+                        <img src="{{ url_for('static', filename='flags/ua.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="bg" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/bg.svg') }}" alt="{{ text.language_bulgarian }}" class="language-flag">
-                        <span>{{ text.language_bulgarian }}</span>
+                    <button type="submit" name="language" value="bg" class="language-button" aria-label="Bulgarian">
+                        <img src="{{ url_for('static', filename='flags/bg.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="cz" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/cz.svg') }}" alt="{{ text.language_czech }}" class="language-flag">
-                        <span>{{ text.language_czech }}</span>
+                    <button type="submit" name="language" value="cz" class="language-button" aria-label="Czech">
+                        <img src="{{ url_for('static', filename='flags/cz.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="ee" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/ee.svg') }}" alt="{{ text.language_estonian }}" class="language-flag">
-                        <span>{{ text.language_estonian }}</span>
+                    <button type="submit" name="language" value="ee" class="language-button" aria-label="Estonian">
+                        <img src="{{ url_for('static', filename='flags/ee.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="fi" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/fi.svg') }}" alt="{{ text.language_finnish }}" class="language-flag">
-                        <span>{{ text.language_finnish }}</span>
+                    <button type="submit" name="language" value="fi" class="language-button" aria-label="Finnish">
+                        <img src="{{ url_for('static', filename='flags/fi.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="fr" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/fr.svg') }}" alt="{{ text.language_french }}" class="language-flag">
-                        <span>{{ text.language_french }}</span>
+                    <button type="submit" name="language" value="fr" class="language-button" aria-label="French">
+                        <img src="{{ url_for('static', filename='flags/fr.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="hu" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/hu.svg') }}" alt="{{ text.language_hungarian }}" class="language-flag">
-                        <span>{{ text.language_hungarian }}</span>
+                    <button type="submit" name="language" value="hu" class="language-button" aria-label="Hungarian">
+                        <img src="{{ url_for('static', filename='flags/hu.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="is" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/is.svg') }}" alt="{{ text.language_icelandic }}" class="language-flag">
-                        <span>{{ text.language_icelandic }}</span>
+                    <button type="submit" name="language" value="is" class="language-button" aria-label="Icelandic">
+                        <img src="{{ url_for('static', filename='flags/is.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="it" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/it.svg') }}" alt="{{ text.language_italian }}" class="language-flag">
-                        <span>{{ text.language_italian }}</span>
+                    <button type="submit" name="language" value="it" class="language-button" aria-label="Italian">
+                        <img src="{{ url_for('static', filename='flags/it.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
-                    <button type="submit" name="language" value="lt" class="language-button">
-                        <img src="{{ url_for('static', filename='flags/lt.svg') }}" alt="{{ text.language_lithuanian }}" class="language-flag">
-                        <span>{{ text.language_lithuanian }}</span>
+                    <button type="submit" name="language" value="lt" class="language-button" aria-label="Lithuanian">
+                        <img src="{{ url_for('static', filename='flags/lt.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="nl" class="language-button" aria-label="Dutch">
+                        <img src="{{ url_for('static', filename='flags/nl.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="pl" class="language-button" aria-label="Polish">
+                        <img src="{{ url_for('static', filename='flags/pl.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="pt" class="language-button" aria-label="Portuguese">
+                        <img src="{{ url_for('static', filename='flags/pt.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="ro" class="language-button" aria-label="Romanian">
+                        <img src="{{ url_for('static', filename='flags/ro.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="ru" class="language-button" aria-label="Russian">
+                        <img src="{{ url_for('static', filename='flags/ru.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="se" class="language-button" aria-label="Swedish">
+                        <img src="{{ url_for('static', filename='flags/se.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="si" class="language-button" aria-label="Slovenian">
+                        <img src="{{ url_for('static', filename='flags/si.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="sk" class="language-button" aria-label="Slovak">
+                        <img src="{{ url_for('static', filename='flags/sk.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="tr" class="language-button" aria-label="Turkish">
+                        <img src="{{ url_for('static', filename='flags/tr.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="rs" class="language-button" aria-label="Serbian">
+                        <img src="{{ url_for('static', filename='flags/rs.svg') }}" alt="" aria-hidden="true" class="language-flag">
+                    </button>
+                    <button type="submit" name="language" value="es" class="language-button" aria-label="Spanish">
+                        <img src="{{ url_for('static', filename='flags/es.svg') }}" alt="" aria-hidden="true" class="language-flag">
                     </button>
                 </div>
             </form>
